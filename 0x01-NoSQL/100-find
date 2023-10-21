@@ -1,0 +1,2 @@
+// Find all documents with the name: Holberton in the collection, School.
+db.school.find({name: /Holberton.*/});

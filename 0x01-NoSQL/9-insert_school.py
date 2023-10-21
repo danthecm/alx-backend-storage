@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """
-A module containing function insert_school
+Insert document into Mongodb using python
 """
 
 
 def insert_school(mongo_collection, **kwargs):
-    """Insert a new school into the database"""
-    result = mongo_collection.insert_one(kwargs)
+    """
+    Insert document into collection school
 
-    return result.inserted_id
+    Args:
+        mongo_collection: pymongo collection object
+        kwargs: Args to be inserted
+
+    Return: Id of inserted document
+    """
+    new_insert = mongo_collection.insert_one(kwargs)
+    return new_insert.inserted_id
