@@ -2,11 +2,11 @@
 """Exercise for Redis Basics"""
 import redis
 import uuid
-from typing import Union, Optional, Callable
+import typing
 from functools import wraps
 
 
-def count_calls(method: Callable) -> Callable:
+def count_calls(method: typing.Callable) -> typing.Callable:
     """Count the number of times a method is called"""
     key = method.__qualname__
 
@@ -18,7 +18,7 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
-def call_history(method: Callable) -> Callable:
+def call_history(method: typing.Callable) -> typing.Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """Wrapper function"""
@@ -35,6 +35,7 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(output_key, str(output))
 
         return output
+    return wrapper
 
 
 class Cache:
@@ -45,15 +46,15 @@ class Cache:
 
     @call_history
     @count_calls
-    def store(self, data: Union[str, bytes, int, float]) -> str:
+    def store(self, data: typing.Union[str, bytes, int, float]) -> str:
         """Store data in Redis using a random key"""
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
 
     def get(
-            self, key: str, fn: Optional[Callable] = None
-            ) -> Union[str, bytes, int, float]:
+            self, key: str, fn: typing.Optional[typing.Callable] = None
+            ) -> typing.Union[str, bytes, int, float]:
         """
         Get a value from a data store using a key.
         Args:
