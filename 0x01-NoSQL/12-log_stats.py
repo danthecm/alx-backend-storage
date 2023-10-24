@@ -1,39 +1,34 @@
 #!/usr/bin/env python3
 """Print info in a collection"""
 from pymongo import MongoClient
+""" Make a check for all elements in a collention """
 
 if __name__ == "__main__":
-    """ Make a check for all elements in a collention """
-    client = MongoClient('mongodb://127.0.0.1:27017')
-    collection = client.logs.nginx
+    # Connect to the MongoDB
+    client = MongoClient('mongodb://localhost:27017')
+    db = client['logs']
+    collection = db['nginx']
 
-    print(f"{collection.estimated_document_count()} logs")
+    # Count the total number of documents
+    total_logs = collection.count_documents({})
 
+    # Count the number of documents with different methods
+    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    method_counts = {
+        method: collection.count_documents(
+            {"method": method}) for method in methods
+        }
+
+    # Count the number of documents with method=GET and path=/status
+    status_check = collection.count_documents(
+        {"method": "GET", "path": "/status"})
+
+    # Print the statistics
+    print(f"{total_logs} logs")
     print("Methods:")
-    for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
-        method_count = collection.count_documents({'method': method})
-        print(f"\tmethod {method}: {method_count}")
+    for method in methods:
+        print(f"    method {method}: {method_counts[method]}")
+    print(f"{status_check} status check")
 
-    check_get = collection.count_documents({
-        'method': 'GET', 'path': "/status"
-    })
-    print(f"{check_get} status check")
-
-    print("IPs:")
-    top_ips = collection.aggregate([
-        {"$group":
-            {
-                "_id": "$ip",
-                "count": {"$sum": 1}
-            }
-        },
-        {"$sort": {"count": -1}},
-        {"$limit": 10},
-        {"$project": {
-            "_id": 0,
-            "ip": "$_id",
-            "count": 1
-        }}
-    ])
-    for ip in top_ips:
-        print(f"\t{ip.get('ip')}: {ip.get('count')}")
+    # Close the MongoDB connection
+    client.close()
